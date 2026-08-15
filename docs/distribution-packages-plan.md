@@ -1,111 +1,110 @@
-# Swiftix 发行版与官方软件包计划
+# Swiftix Distribution and Official Package Plan
 
-> 状态：持续维护 · 最后核验：2026-08-15
+> Status: actively maintained · Last reviewed: 2026-08-15
 
-## 1. 两层交付模型
+## 1. Two-layer delivery model
 
-SwiftixDistribution 同时服务两个不同生命周期，不能把它们混成一套启动逻辑：
+SwiftixDistribution serves two distinct lifecycles. They must not be combined into a single startup path.
 
-| 层 | 格式 | 内容 | 交付时机 | 所有者 |
+| Layer | Format | Contents | Delivery point | Owner |
 | --- | --- | --- | --- | --- |
-| Base distribution | `.sximg` rootfs | 最小可启动用户空间、默认 `/etc`、预装的基础 `.pkg` | 随消费方发布；仅新 VM 首次启动恢复 | `Distribution/Minimal` |
-| Optional software | `.pkg` | 用户显式选择的工具、数据和未来第三方 port | VM 运行后由 `pkg` 安装/升级 | 后续 `Packages/` / `Ports/` |
+| Base distribution | `.sximg` root filesystem | Minimal bootable userland, default `/etc` content, and preinstalled base `.pkg` archives | Shipped with a consumer and restored only when a new VM starts for the first time | `Distribution/Minimal` |
+| Optional software | `.pkg` | Explicitly selected tools and data, plus future third-party ports | Installed or upgraded by `pkg` after the VM is running | Future `Packages/` and `Ports/` repositories |
 
-Base image 是“发行版模板”，不是每次 boot 的覆盖层。VM 一旦拥有持久化快照，快照就是该实例磁盘的事实来源；升级消费端或 base artifact 不得重新写入 `/usr/bin`、`/etc` 或用户修改过的文件。
+The base image is a distribution template, not an overlay applied at every boot. After a VM has a persistent snapshot, that snapshot is the source of truth for the instance's disk. Upgrading a consumer or its base artifact must not rewrite `/usr/bin`, `/etc`, or user-modified files.
 
-`.pkg` 是统一的软件包格式：基础包可在构建时预装进 `.sximg`，其他包可在实例运行后独立升级和卸载。软件源服务可以验证、索引、存储和分发软件包，但不拥有源码，也不参与 base image 组装。
+The `.pkg` format is the common software package format. Base packages can be installed into an `.sximg` at build time, while other packages can be upgraded and removed independently after an instance starts. A package repository service may validate, index, store, and distribute packages, but it neither owns their source code nor participates in base image assembly.
 
-## 2. 已落地的 Minimal 发行版
+## 2. Implemented Minimal distribution
 
-`Swiftix Minimal 2.1.1` 由声明式 manifest 组装：
+`Swiftix Minimal 2.1.1` is assembled from a declarative manifest:
 
-- 目标固定为 `GOOS=swiftix`、`GOARCH=svm64`；宿主可为 macOS 或 Linux；
-- 17 个基础命令由 coreutils 仓库确定性构建为 `coreutils_1.0.0.pkg`，发行版按 manifest 校验包身份后安装；
-- executable 安装到 `/usr/bin`，uid/gid 为 0、mode 为 `0755`；
-- `/var/lib/pkg/status` 登记 `coreutils` 及其完整文件所有权，使后续升级和查询遵守同一套包管理语义；
-- `/bin`、`/sbin`、`/lib` 使用 usr-merge symlink，并创建 Debian/FHS 常用目录；
-- `/etc/hosts`、`/etc/os-release`、`/etc/pkg/sources.list` 作为发行版内容写入；
-- rootfs 通过 `SwiftixImage` v1 编码，保留 inode metadata 与 link identity，并带 SHA-256 完整性摘要；
-- checked-in artifact 由 `swift run SwiftixDistributionBuilder --check` 做 byte-for-byte 重建检查。
+- The target is fixed at `GOOS=swiftix` and `GOARCH=svm64`; the host may be macOS or Linux.
+- The coreutils repository deterministically builds 17 base commands into `coreutils_1.0.0.pkg`. The distribution validates the package identity declared by the manifest before installation.
+- Executables are installed in `/usr/bin` with UID 0, GID 0, and mode `0755`.
+- `/var/lib/pkg/status` records coreutils and its complete file ownership information so that subsequent queries and upgrades use the same package management semantics.
+- `/bin`, `/sbin`, and `/lib` are usr-merge symbolic links, and the image contains common Debian/FHS directories.
+- `/etc/hosts`, `/etc/os-release`, and `/etc/pkg/sources.list` are written as distribution-owned content.
+- The root filesystem is encoded with `SwiftixImage` v1. The format preserves inode metadata and link identity and includes a SHA-256 integrity digest.
+- `swift run SwiftixDistributionBuilder --check` verifies the checked-in artifact with a byte-for-byte rebuild.
 
-运行测试必须在真实 `Kernel + EventLoop` 中恢复 artifact，并从 `/usr/bin`/PATH 启动 executable image，而不只测试内部编译器函数。
+Runtime tests must restore the artifact through a real `Kernel` and `EventLoop`, then launch executable images from `/usr/bin` through `PATH`. Testing internal compiler functions alone is insufficient.
 
-## 3. 发行版版本与实例升级
+## 3. Distribution versions and instance upgrades
 
-发行版有独立版本，manifest 同时记录最低 Swiftix 版本。内容变化遵循以下规则：
+The distribution has its own version, and its manifest also records the minimum compatible Swiftix version. Content changes follow these rules:
 
-1. 修改源码、静态文件、权限、symlink 或命令集合时提升发行版版本并重建 artifact。
-2. CI 在 macOS/Linux 上分别构建，验证两端输出与 checked-in artifact 相同。
-3. 每次发布记录 artifact digest；下游消费者在自己的发布流程中独立更新 pin 并验证恢复行为。
-4. 新建 VM 使用新版 base；已有 VM 快照保持原状。
-5. 对已有 VM 的系统迁移必须由显式、版本化、可回滚的升级机制完成，不能隐藏在消费端启动流程中。
+1. Increment the distribution version and rebuild the artifact when changing command sources, static files, permissions, symbolic links, or the command set.
+2. Build on both macOS and Linux in CI, and verify that both outputs match the checked-in artifact.
+3. Record the artifact digest for every release. Downstream consumers update their pins and validate restoration in their own release processes.
+4. New VMs use the new base image; existing VM snapshots remain unchanged.
+5. Migrations for existing VMs must use an explicit, versioned, and reversible upgrade mechanism. They must not be hidden in consumer startup code.
 
-当前 `.sximg` 摘要是完整性校验，不是发布签名。本地绑定交付由消费端发布链和 digest pin 共同约束；在线获取则必须先设计签名元数据、信任根、回滚保护和离线策略。
+The current `.sximg` digest provides integrity checking, not release authentication. For locally bundled delivery, the consumer's release chain and digest pin jointly constrain the artifact. Network retrieval additionally requires signed metadata, a trust root, rollback protection, and a defined offline policy.
 
-## 4. 可选官方软件策略
+## 4. Optional official software
 
-官方包优先补齐 base 与核心没有的能力，不为了“像 Linux”重复打包同名命令。候选程序必须由 Swiftix Go/runtime 真实承载，并明确小于 POSIX/GNU/上游的范围。
+Official packages should add capabilities that are absent from the base distribution and Swiftix core. Packages should not duplicate commands merely to resemble Linux. Every candidate program must run on the actual Swiftix Go toolchain and runtime, and its documented scope must clearly distinguish it from POSIX, GNU, or upstream behavior.
 
-建议支持等级：
+Proposed support tiers:
 
-- **Base**：默认支持并进入发行版或基础元包，每次发布做行为测试；
-- **Tools**：官方维护、用户按需安装；
-- **Lab**：实验性 port，明确资源与兼容限制，不混入稳定 channel。
+- **Base:** Supported by default and included in the distribution or a base metapackage; behavior is tested for every release.
+- **Tools:** Maintained by the project and installed by users as needed.
+- **Lab:** Experimental ports with explicit resource and compatibility limits; never included in the stable channel.
 
-基础交付链已由 `coreutils` 打通，原计划中的 `tr`、`tac`、`paste`、`comm`、`fold`
-已经进入基础包；第一批仓库可选包仍应先用 `hello-swiftix` 验证发布、在线安装、升级、卸载和回滚，然后再考虑：
+Coreutils now establishes the base delivery pipeline. The originally planned `tr`, `tac`, `paste`, `comm`, and `fold` commands are part of the base package. Before publishing further optional packages, `hello-swiftix` should exercise publishing, online installation, upgrades, removal, and rollback. The next candidates are:
 
 ```text
 jsonq  netbench
 ```
 
-`tree`、`file`、`hexdump`、`base64`、`sha256sum`、`date`、`tar`、`gzip` 等需要先补齐 binary-safe I/O、目录/时间 API 和对应标准库；不得用 UTF-8 文本实现冒充二进制工具。它们也应按 Debian 的包边界分别进入 `tree`、`file`、`util-linux`、`coreutils`、`tar`、`gzip`，而不是全部塞进 coreutils。`git`、`ssh`、完整 TLS `curl` 属于远期能力，必须经过系统调用、密码学、许可证、性能和长期维护评估。
+Programs such as `tree`, `file`, `hexdump`, `base64`, `sha256sum`, `date`, `tar`, and `gzip` require binary-safe I/O, directory and time APIs, and supporting standard libraries. Text-only UTF-8 implementations must not be presented as binary utilities. Package boundaries should also follow established Debian conventions: use separate `tree`, `file`, `util-linux`, `coreutils`, `tar`, and `gzip` packages instead of placing every command in coreutils. `git`, `ssh`, and a complete TLS-enabled `curl` are longer-term work and require evaluation of system calls, cryptography, licensing, performance, and ongoing maintenance.
 
-## 5. `.pkg` 质量门槛
+## 5. `.pkg` quality requirements
 
-每个可选包进入官方 `main` 前必须满足：
+Every optional package must satisfy these requirements before entering the official `main` repository:
 
-1. 源码与第三方版本/digest 固定，构建不下载浮动依赖；
-2. 两次构建的 `.pkg` bytes 完全一致；
-3. archive manifest 与生成的 `Packages` 索引对包身份、文件名、大小和 digest 的记录一致；
-4. 安装后的 executable 从真实 VFS PATH 启动；
-5. 覆盖 fresh install、reinstall、upgrade、remove、冲突和失败回滚；
-6. 网络测试使用可控虚拟拓扑和 logical time；
-7. README、已知差异、exit status、LICENSE/NOTICE 和资源限制完整；
-8. 先发布 staging，再把同一份 byte-identical archive 发布到 main。
+1. Pin all source and third-party versions and digests. Builds must not download floating dependencies.
+2. Two builds of the package must produce byte-identical `.pkg` archives.
+3. The archive manifest and generated `Packages` index must agree on package identity, filename, size, and digest.
+4. Installed executables must launch from the real VFS through `PATH`.
+5. Tests must cover fresh installation, reinstallation, upgrade, removal, conflicts, and rollback after failure.
+6. Network tests must use a controlled virtual topology and logical time.
+7. Documentation must include a README, known behavioral differences, exit statuses, LICENSE or NOTICE files, and resource limits.
+8. A package must be published to `staging` before the same byte-identical archive is promoted to `main`.
 
-当前默认 source 是：
+The current default source is:
 
 ```text
 repo http://swiftix.holdon.work/repo ./
 ```
 
-archive 会按索引 SHA-256 校验，但 HTTP 与未签名索引不足以抵抗同时替换索引和内容的攻击。正式可信发布前需要 signed index 或经过证书校验的 HTTPS transport。VM 启动不自动联网，仓库故障不能阻止开机或快照恢复。
+Package archives are checked against the SHA-256 digest in the index. However, HTTP and an unsigned index cannot prevent an attacker from replacing both the index and its contents. A trusted production release requires either a signed index or HTTPS with certificate validation. VM startup performs no automatic network access, so a repository outage cannot block boot or snapshot restoration.
 
-## 6. 文件所有权原则
+## 6. File ownership rules
 
-- base rootfs 可以拥有首次启动模板中的 `/etc`，但实例创建后由其持久化磁盘拥有；
-- `.pkg` executable 安装到 `/usr/bin/<command>`，运行数据放 `/usr/share/<package>/`，文档和许可放 `/usr/share/doc/<package>/`；
-- 没有 conffile merge 语义前，可选包不直接接管用户可能修改的 `/etc` 文件；
-- 一个路径只有一个明确 owner，不使用启动代码覆盖包管理器或用户写入；
-- 不安装到 `/home/user`，不运行任意 maintainer script，不发布外部平台二进制。
+- The base root filesystem may own `/etc` in the first-boot template. After instance creation, the persistent instance disk owns that content.
+- A `.pkg` installs executables in `/usr/bin/<command>`, runtime data in `/usr/share/<package>/`, and documentation and licenses in `/usr/share/doc/<package>/`.
+- Until conffile merge semantics exist, optional packages must not take ownership of user-modifiable files in `/etc`.
+- Every path has exactly one owner. Startup code must not overwrite files owned by the package manager or the user.
+- Packages must not install files in `/home/user`, execute arbitrary maintainer scripts, or distribute binaries for external platforms.
 
-## 7. 后续里程碑
+## 7. Milestones
 
-### M1：发行版发布工程化
+### M1: Distribution release engineering
 
-- 为 `.sximg` 版本兼容与发布 digest 建立自动检查；
-- 增加 release note、SBOM/源码对应关系和签名设计；
-- 定义显式的 VM distribution upgrade/migration 接口。
+- Add automated checks for `.sximg` version compatibility and release digests.
+- Add release notes, an SBOM-to-source mapping, and a signature design.
+- Define an explicit VM distribution upgrade and migration interface.
 
-### M2：可选包交付链
+### M2: Optional package delivery
 
-- 实现 `hello-swiftix` builder 与 staging E2E；
-- 完成 signed index 或 HTTPS 信任方案；
-- 发布首批文本/网络工具并验证真实升级。
+- Implement the `hello-swiftix` builder and a staging end-to-end test.
+- Complete either a signed-index design or an HTTPS trust model.
+- Publish the first text and network tools and validate real upgrades.
 
-### M3：系统工具能力
+### M3: System utility support
 
-- 补 Swiftix Go 的 binary/file/time 能力；
-- 发布二进制安全的基础工具和 opt-in `swiftix-tools` 元包；
-- 建立第三方 Ports 的源码、patch、许可和资源基准流程。
+- Add binary, file, and time capabilities to Swiftix Go.
+- Publish binary-safe base utilities and an opt-in `swiftix-tools` metapackage.
+- Establish source, patch, licensing, and resource-baseline processes for third-party ports.
