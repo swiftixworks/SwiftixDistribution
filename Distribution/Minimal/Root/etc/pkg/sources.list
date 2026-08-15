@@ -1,0 +1,2 @@
+# Swiftix uses a flat package repository.
+repo http://swiftix.holdon.work/repo ./

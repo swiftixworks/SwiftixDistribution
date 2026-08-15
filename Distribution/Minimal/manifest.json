@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "identifier": "org.swiftix.minimal",
+  "name": "Swiftix Minimal",
+  "version": "2.1.1",
+  "minimumSwiftixVersion": "0.9.0",
+  "packages": [
+    {
+      "name": "coreutils",
+      "version": "1.0.0",
+      "source": "Artifacts/coreutils_1.0.0.pkg"
+    }
+  ],
+  "directories": [
+    { "path": "/dev", "mode": "0755" },
+    { "path": "/home", "mode": "0755" },
+    { "path": "/media", "mode": "0755" },
+    { "path": "/mnt", "mode": "0755" },
+    { "path": "/opt", "mode": "0755" },
+    { "path": "/proc", "mode": "0555" },
+    { "path": "/root", "mode": "0700" },
+    { "path": "/run", "mode": "0755" },
+    { "path": "/srv", "mode": "0755" },
+    { "path": "/sys", "mode": "0555" },
+    { "path": "/tmp", "mode": "1777" },
+    { "path": "/usr/lib", "mode": "0755" },
+    { "path": "/usr/local/bin", "mode": "0755" },
+    { "path": "/usr/local/sbin", "mode": "0755" },
+    { "path": "/usr/sbin", "mode": "0755" },
+    { "path": "/usr/share", "mode": "0755" },
+    { "path": "/var/cache/pkg/archives", "mode": "0755" },
+    { "path": "/var/lib/pkg/lists", "mode": "0755" },
+    { "path": "/var/lib/pkg/updates", "mode": "0755" },
+    { "path": "/var/log", "mode": "0755" },
+    { "path": "/var/tmp", "mode": "1777" }
+  ],
+  "files": [
+    { "source": "Root/etc/hosts", "path": "/etc/hosts", "mode": "0644" },
+    { "source": "Root/etc/os-release", "path": "/etc/os-release", "mode": "0644" },
+    { "source": "Root/etc/pkg/sources.list", "path": "/etc/pkg/sources.list", "mode": "0644" }
+  ],
+  "symlinks": [
+    { "path": "/bin", "target": "/usr/bin" },
+    { "path": "/lib", "target": "/usr/lib" },
+    { "path": "/sbin", "target": "/usr/sbin" }
+  ]
+}
