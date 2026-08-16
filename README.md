@@ -4,25 +4,27 @@ SwiftixDistribution is the official build repository for Swiftix distributions. 
 
 ```text
 coreutils_1.0.0.pkg ─┐
-                     ├──► Distribution/Minimal (/etc + manifest)
+sysutils_0.1.0.pkg ──┼──► Distribution/Minimal (/etc + manifest)
                      │                    │
                      │                    ▼
-            SwiftixDistributionBuilder
-                         │
-                         ▼
-       Artifacts/swiftix-minimal.sximg
-                         │
-                         ▼
-       Downstream consumer verifies pinned digest
-                         │
-                         ▼
-         New instance restores root filesystem
-         Existing instance keeps its snapshot
+                     │       SwiftixDistributionBuilder
+                     │                    │
+                     │                    ▼
+                     │  Artifacts/swiftix-minimal.sximg
+                     │                    │
+                     │                    ▼
+                     │  Downstream verifies pinned digest
+                     │                    │
+                     │                    ▼
+                     └── New instance restores root filesystem
+                         Existing instance keeps its snapshot
 ```
 
-`Swiftix Minimal 2.1.1` currently includes:
+`Swiftix Minimal 2.2.0` currently includes:
 
 - 17 base commands installed and registered from the native `coreutils_1.0.0.pkg` archive: `cat`, `comm`, `echo`, `false`, `fold`, `head`, `nl`, `paste`, `rev`, `seq`, `sort`, `tac`, `tail`, `tr`, `true`, `uniq`, and `wc`;
+- four teaching diagnostics from `sysutils_0.1.0.pkg`: `lsof`, `memstat`,
+  `pstree`, and `strace`;
 - usr-merge-style `/bin`, `/sbin`, and `/lib` symbolic links, together with common Debian/FHS directories;
 - `/etc/hosts`, `/etc/os-release`, and `/etc/pkg/sources.list`; and
 - pinned distribution identity, version, and minimum Swiftix version metadata.
@@ -33,6 +35,7 @@ coreutils_1.0.0.pkg ─┐
 | --- | --- |
 | [Swiftix](https://github.com/swiftixworks/Swiftix) | Kernel and VFS, Go toolchain and runtime, the `SwiftixImage` codec, and `pkg` |
 | [coreutils](https://github.com/swiftixworks/coreutils) | Go sources for the base commands, the deterministic package builder, and `coreutils_1.0.0.pkg` |
+| [sysutils](https://github.com/swiftixworks/sysutils) | Go sources for versioned teaching diagnostics and the deterministic `sysutils_0.1.0.pkg` |
 | **SwiftixDistribution** | Selection of base packages and `/etc` content, plus building, validating, and versioning root filesystem artifacts |
 | Downstream consumers | Pinning and validating a specific `.sximg` version, and managing instance creation, persistence, and migration |
 
@@ -46,6 +49,7 @@ Building requires Swift 6.3 or later and the following sibling repository layout
 swiftixworks/
 ├── Swiftix/
 ├── coreutils/
+├── sysutils/
 └── SwiftixDistribution/
 ```
 
@@ -61,7 +65,9 @@ The `--check` option rebuilds the image from the pinned coreutils package and th
 
 ## Updating the distribution
 
-1. Modify base commands in the coreutils repository, then rebuild and validate `Artifacts/coreutils_1.0.0.pkg`. Add static distribution files under `Distribution/Minimal/Root/`.
+1. Modify commands in their owning repository, then rebuild and validate the
+   declared package artifact. Add static distribution files under
+   `Distribution/Minimal/Root/`.
 2. Update `Distribution/Minimal/manifest.json`. Package declarations must be unique and sorted by name, and every guest path must be a canonical absolute path.
 3. Increment the distribution version in the manifest whenever the delivered content changes.
 4. Run `swift run SwiftixDistributionBuilder` to rebuild `Artifacts/swiftix-minimal.sximg`.

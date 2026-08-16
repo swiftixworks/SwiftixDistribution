@@ -1,6 +1,6 @@
 # Swiftix Distribution and Official Package Plan
 
-> Status: actively maintained · Last reviewed: 2026-08-15
+> Status: actively maintained · Last reviewed: 2026-08-16
 
 ## 1. Two-layer delivery model
 
@@ -17,12 +17,17 @@ The `.pkg` format is the common software package format. Base packages can be in
 
 ## 2. Implemented Minimal distribution
 
-`Swiftix Minimal 2.1.1` is assembled from a declarative manifest:
+`Swiftix Minimal 2.2.0` is assembled from a declarative manifest:
 
 - The target is fixed at `GOOS=swiftix` and `GOARCH=svm64`; the host may be macOS or Linux.
 - The coreutils repository deterministically builds 17 base commands into `coreutils_1.0.0.pkg`. The distribution validates the package identity declared by the manifest before installation.
+- The sysutils repository builds `memstat`, `lsof`, `pstree`, and `strace` into
+  `sysutils_0.1.0.pkg`; its builder and commands validate Swiftix teaching
+  procfs schema 1.
 - Executables are installed in `/usr/bin` with UID 0, GID 0, and mode `0755`.
-- `/var/lib/pkg/status` records coreutils and its complete file ownership information so that subsequent queries and upgrades use the same package management semantics.
+- `/var/lib/pkg/status` records coreutils and sysutils with complete file
+  ownership information so subsequent queries and upgrades use the same package
+  management semantics.
 - `/bin`, `/sbin`, and `/lib` are usr-merge symbolic links, and the image contains common Debian/FHS directories.
 - `/etc/hosts`, `/etc/os-release`, and `/etc/pkg/sources.list` are written as distribution-owned content.
 - The root filesystem is encoded with `SwiftixImage` v1. The format preserves inode metadata and link identity and includes a SHA-256 integrity digest.
@@ -52,7 +57,12 @@ Proposed support tiers:
 - **Tools:** Maintained by the project and installed by users as needed.
 - **Lab:** Experimental ports with explicit resource and compatibility limits; never included in the stable channel.
 
-Coreutils now establishes the base delivery pipeline. The originally planned `tr`, `tac`, `paste`, `comm`, and `fold` commands are part of the base package. Before publishing further optional packages, `hello-swiftix` should exercise publishing, online installation, upgrades, removal, and rollback. The next candidates are:
+Coreutils establishes the basic-command delivery pipeline, and sysutils validates
+independently packaged kernel-observability consumers. The originally planned
+`tr`, `tac`, `paste`, `comm`, and `fold` commands are part of the base package.
+Before publishing further optional packages, `hello-swiftix` should exercise
+publishing, online installation, upgrades, removal, and rollback. The next
+candidates are:
 
 ```text
 jsonq  netbench

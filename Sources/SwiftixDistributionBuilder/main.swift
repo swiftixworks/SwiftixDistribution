@@ -11,6 +11,7 @@ private struct DistributionManifest: Decodable {
     struct Package: Decodable {
         let name: String
         let version: String
+        let repository: String
         let source: String
     }
 
@@ -72,8 +73,7 @@ private let repositoryRoot = URL(fileURLWithPath: #filePath)
     .deletingLastPathComponent()  // SwiftixDistributionBuilder
     .deletingLastPathComponent()  // Sources
     .deletingLastPathComponent()  // repository root
-private let coreutilsRoot = repositoryRoot.deletingLastPathComponent()
-    .appendingPathComponent("coreutils", isDirectory: true)
+private let workspaceRoot = repositoryRoot.deletingLastPathComponent()
 private let distributionRoot =
     repositoryRoot
     .appendingPathComponent("Distribution/Minimal", isDirectory: true)
@@ -116,13 +116,14 @@ private func loadManifest() throws -> DistributionManifest {
     let manifest = try JSONDecoder().decode(
         DistributionManifest.self,
         from: Data(contentsOf: manifestURL))
-    guard manifest.schemaVersion == 1 else {
+    guard manifest.schemaVersion == 2 else {
         throw BuilderError.invalidManifest(
             "unsupported distribution manifest schema \(manifest.schemaVersion)")
     }
     let names = manifest.packages.map(\.name)
     guard names == names.sorted(), Set(names).count == names.count,
-        names.allSatisfy(isSafeComponent)
+        names.allSatisfy(isSafeComponent),
+        manifest.packages.allSatisfy({ isSafeComponent($0.repository) })
     else {
         throw BuilderError.invalidManifest(
             "distribution package names must be unique, safe, and sorted")
@@ -140,7 +141,7 @@ private func loadManifest() throws -> DistributionManifest {
             "distribution paths must be unique and sorted by section")
     }
     for package in manifest.packages {
-        _ = try packageFileURL(package.source)
+        _ = try packageFileURL(package)
     }
     for directory in manifest.directories {
         _ = try parsedMode(directory.mode)
@@ -159,19 +160,27 @@ private func loadManifest() throws -> DistributionManifest {
     return manifest
 }
 
-private func packageFileURL(_ relativePath: String) throws -> URL {
+private func packageFileURL(_ declaration: DistributionManifest.Package) throws -> URL {
+    let relativePath = declaration.source
     guard !relativePath.isEmpty,
         !relativePath.hasPrefix("/"),
         !relativePath.contains("\0")
     else {
         throw BuilderError.invalidManifest(
-            "invalid coreutils package path \(relativePath)")
+            "invalid package path \(relativePath)")
     }
-    let url = coreutilsRoot.appendingPathComponent(relativePath)
+    let packageRoot = workspaceRoot
+        .appendingPathComponent(declaration.repository, isDirectory: true)
         .standardizedFileURL
-    guard url.path.hasPrefix(coreutilsRoot.path + "/") else {
+    guard packageRoot.deletingLastPathComponent() == workspaceRoot.standardizedFileURL else {
         throw BuilderError.invalidManifest(
-            "coreutils package path escapes repository: \(relativePath)")
+            "package repository escapes workspace: \(declaration.repository)")
+    }
+    let url = packageRoot.appendingPathComponent(relativePath)
+        .standardizedFileURL
+    guard url.path.hasPrefix(packageRoot.path + "/") else {
+        throw BuilderError.invalidManifest(
+            "package path escapes repository: \(relativePath)")
     }
     return url
 }
@@ -179,7 +188,7 @@ private func packageFileURL(_ relativePath: String) throws -> URL {
 private func loadPackage(
     _ declaration: DistributionManifest.Package
 ) throws -> PackageArchive {
-    let bytes = Array(try Data(contentsOf: packageFileURL(declaration.source)))
+    let bytes = Array(try Data(contentsOf: packageFileURL(declaration)))
     let archive = try PackageArchive.decode(bytes)
     guard archive.manifest.name == declaration.name,
         archive.manifest.version.description == declaration.version,

@@ -15,8 +15,8 @@ struct DistributionImageTests {
     func artifactContents() throws {
         let image = try loadImage()
         #expect(image.distribution.identifier == "org.swiftix.minimal")
-        #expect(image.distribution.version == "2.1.1")
-        #expect(image.distribution.minimumSwiftixVersion == "0.9.0")
+        #expect(image.distribution.version == "2.2.0")
+        #expect(image.distribution.minimumSwiftixVersion == "0.11.0")
         #expect(image.distribution.operatingSystem == "swiftix")
         #expect(image.distribution.architecture == "svm64")
 
@@ -59,8 +59,11 @@ struct DistributionImageTests {
         #expect(state.repository.contains("repo http://swiftix.holdon.work/repo ./"))
         let installed = try InstalledDatabase.parse(state.packageStatus)
         #expect(installed.package(named: "coreutils")?.version.description == "1.0.0")
+        #expect(installed.package(named: "sysutils")?.version.description == "0.1.0")
         #expect(installed.owner(ofFile: "/usr/bin/cat") == "coreutils")
+        #expect(installed.owner(ofFile: "/usr/bin/memstat") == "sysutils")
         #expect(installed.owner(ofFile: "/usr/share/doc/coreutils/LICENSE") == "coreutils")
+        #expect(installed.owner(ofFile: "/usr/share/doc/sysutils/README.md") == "sysutils")
         #expect(state.rootMode?.rawValue == 0o700)
         #expect(state.tmpMode?.rawValue == 0o1777)
         #expect(state.executableNames == Set(commandNames))
@@ -90,8 +93,12 @@ struct DistributionImageTests {
             "echo banana | tr a-z A-Z",
             "echo abcdef | fold -w 3",
             "which echo",
+            "memstat",
+            "pstree",
             "pkg info coreutils",
+            "pkg info sysutils",
             "pkg owner /usr/bin/cat",
+            "pkg owner /usr/bin/memstat",
         ] {
             terminal.writeFromApp(Array((line + "\n").utf8))
             loop.runUntilIdle()
@@ -103,9 +110,13 @@ struct DistributionImageTests {
         #expect(rendered.contains("BANANA\n"))
         #expect(rendered.contains("abc\ndef\n"))
         #expect(rendered.contains("/usr/bin/echo"))
+        #expect(rendered.contains("MODEL managed-runtime"))
+        #expect(rendered.contains("sh("))
         #expect(rendered.contains("Package: coreutils"))
+        #expect(rendered.contains("Package: sysutils"))
         #expect(rendered.contains("Status: installed"))
         #expect(rendered.contains("coreutils: /usr/bin/cat"))
+        #expect(rendered.contains("sysutils: /usr/bin/memstat"))
     }
 
     @Test("instance snapshots override the immutable first-boot image")
@@ -133,6 +144,7 @@ struct DistributionImageTests {
         [
             "cat", "comm", "echo", "false", "fold", "head", "nl", "paste",
             "rev", "seq", "sort", "tac", "tail", "tr", "true", "uniq", "wc",
+            "lsof", "memstat", "pstree", "strace",
         ]
     }
 

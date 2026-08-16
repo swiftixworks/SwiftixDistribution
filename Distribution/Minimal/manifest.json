@@ -1,14 +1,21 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "identifier": "org.swiftix.minimal",
   "name": "Swiftix Minimal",
-  "version": "2.1.1",
-  "minimumSwiftixVersion": "0.9.0",
+  "version": "2.2.0",
+  "minimumSwiftixVersion": "0.11.0",
   "packages": [
     {
       "name": "coreutils",
       "version": "1.0.0",
+      "repository": "coreutils",
       "source": "Artifacts/coreutils_1.0.0.pkg"
+    },
+    {
+      "name": "sysutils",
+      "version": "0.1.0",
+      "repository": "sysutils",
+      "source": "Artifacts/sysutils_0.1.0.pkg"
     }
   ],
   "directories": [
