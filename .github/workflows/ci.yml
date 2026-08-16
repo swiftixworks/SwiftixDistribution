@@ -32,12 +32,14 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: swiftixworks/coreutils
+          ref: v1.0.0
           path: coreutils
 
       - name: Check out sysutils package
         uses: actions/checkout@v6
         with:
           repository: swiftixworks/sysutils
+          ref: v0.1.0
           path: sysutils
 
       - name: Install Swift 6.3.3
