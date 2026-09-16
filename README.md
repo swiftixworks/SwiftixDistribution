@@ -20,7 +20,7 @@ sysutils_0.1.0.pkg ──┼──► Distribution/Minimal (/etc + manifest)
                          Existing instance keeps its snapshot
 ```
 
-`Swiftix Minimal 2.2.0` currently includes:
+`Swiftix Minimal 2.2.1` currently includes:
 
 - 17 base commands installed and registered from the native `coreutils_1.0.0.pkg` archive: `cat`, `comm`, `echo`, `false`, `fold`, `head`, `nl`, `paste`, `rev`, `seq`, `sort`, `tac`, `tail`, `tr`, `true`, `uniq`, and `wc`;
 - four teaching diagnostics from `sysutils_0.1.0.pkg`: `lsof`, `memstat`,

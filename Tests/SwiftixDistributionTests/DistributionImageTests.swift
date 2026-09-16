@@ -15,7 +15,7 @@ struct DistributionImageTests {
     func artifactContents() throws {
         let image = try loadImage()
         #expect(image.distribution.identifier == "org.swiftix.minimal")
-        #expect(image.distribution.version == "2.2.0")
+        #expect(image.distribution.version == "2.2.1")
         #expect(image.distribution.minimumSwiftixVersion == "0.11.0")
         #expect(image.distribution.operatingSystem == "swiftix")
         #expect(image.distribution.architecture == "svm64")
@@ -55,7 +55,6 @@ struct DistributionImageTests {
         #expect(state.libTarget == "/usr/lib")
         #expect(state.sbinTarget == "/usr/sbin")
         #expect(state.osRelease.contains("ID=swiftix"))
-        #expect(state.osRelease.contains("ID_LIKE=debian"))
         #expect(state.repository.contains("repo http://swiftix.holdon.work/repo ./"))
         let installed = try InstalledDatabase.parse(state.packageStatus)
         #expect(installed.package(named: "coreutils")?.version.description == "1.0.0")

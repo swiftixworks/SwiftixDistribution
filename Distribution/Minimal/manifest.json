@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "identifier": "org.swiftix.minimal",
   "name": "Swiftix Minimal",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "minimumSwiftixVersion": "0.11.0",
   "packages": [
     {

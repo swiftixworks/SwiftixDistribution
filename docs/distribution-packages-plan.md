@@ -17,7 +17,7 @@ The `.pkg` format is the common software package format. Base packages can be in
 
 ## 2. Implemented Minimal distribution
 
-`Swiftix Minimal 2.2.0` is assembled from a declarative manifest:
+`Swiftix Minimal 2.2.1` is assembled from a declarative manifest:
 
 - The target is fixed at `GOOS=swiftix` and `GOARCH=svm64`; the host may be macOS or Linux.
 - The coreutils repository deterministically builds 17 base commands into `coreutils_1.0.0.pkg`. The distribution validates the package identity declared by the manifest before installation.
