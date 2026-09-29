@@ -9,7 +9,7 @@ let package = Package(
     ],
     dependencies: [
         // SwiftixDistribution is a distribution build repository, not a runtime
-        // dependency. Local development and CI check out the toolchain beside it;
+        // dependency. Local development checks out the toolchain beside it;
         // the builder also consumes package artifacts from declared sibling
         // repositories such as ../coreutils, ../editors, and ../sysutils.
         .package(path: "../Swiftix"),

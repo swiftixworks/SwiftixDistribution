@@ -44,7 +44,7 @@ Runtime tests must restore the artifact through a real `Kernel` and `EventLoop`,
 The distribution has its own version, and its manifest also records the minimum compatible Swiftix version. Content changes follow these rules:
 
 1. Increment the distribution version and rebuild the artifact when changing command sources, static files, permissions, symbolic links, or the command set.
-2. Build on both macOS and Linux in CI, and verify that both outputs match the checked-in artifact.
+2. Build on both macOS and Linux with `SwiftixDistributionBuilder --check`, and verify that both outputs match the checked-in artifact.
 3. Record the artifact digest for every release. Downstream consumers update their pins and validate restoration in their own release processes.
 4. New VMs use the new base image; existing VM snapshots remain unchanged.
 5. Migrations for existing VMs must use an explicit, versioned, and reversible upgrade mechanism. They must not be hidden in consumer startup code.
