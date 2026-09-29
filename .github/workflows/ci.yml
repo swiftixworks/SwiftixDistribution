@@ -37,13 +37,11 @@ jobs:
           ref: v1.0.0
           path: coreutils
 
-      # editors has no release tag yet, so pin the exact commit that built
-      # editors_0.1.0.pkg.
       - name: Check out editors package
         uses: actions/checkout@v6
         with:
           repository: swiftixworks/editors
-          ref: 6c5b193076911a097e09d2fc9abebdfea514fc8c
+          ref: v0.1.0
           path: editors
 
       - name: Check out sysutils package
