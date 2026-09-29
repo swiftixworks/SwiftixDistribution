@@ -21,11 +21,13 @@ jobs:
         with:
           path: SwiftixDistribution
 
+      # nano needs the Swiftix 0.12 terminal ABI and strings package from
+      # swiftixworks/Swiftix#1; pin the v0.12.0 tag once that release ships.
       - name: Check out Swiftix toolchain
         uses: actions/checkout@v6
         with:
           repository: swiftixworks/Swiftix
-          ref: v0.11.0
+          ref: feat/go-terminal-abi
           path: Swiftix
 
       - name: Check out coreutils package
@@ -34,6 +36,15 @@ jobs:
           repository: swiftixworks/coreutils
           ref: v1.0.0
           path: coreutils
+
+      # editors has no release tag yet, so pin the exact commit that built
+      # editors_0.1.0.pkg.
+      - name: Check out editors package
+        uses: actions/checkout@v6
+        with:
+          repository: swiftixworks/editors
+          ref: 6c5b193076911a097e09d2fc9abebdfea514fc8c
+          path: editors
 
       - name: Check out sysutils package
         uses: actions/checkout@v6

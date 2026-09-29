@@ -1,7 +1,7 @@
 NAME="Swiftix Minimal"
 ID=swiftix
-VERSION="2.2.1"
-VERSION_ID="2.2.1"
+VERSION="2.3.0"
+VERSION_ID="2.3.0"
 VERSION_CODENAME=minimal
-PRETTY_NAME="Swiftix Minimal 2.2.1"
+PRETTY_NAME="Swiftix Minimal 2.3.0"
 HOME_URL="https://github.com/swiftixworks/SwiftixDistribution"
