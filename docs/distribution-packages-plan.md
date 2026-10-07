@@ -17,16 +17,16 @@ The `.pkg` format is the common software package format. Base packages can be in
 
 ## 2. Implemented Minimal distribution
 
-`Swiftix Minimal 2.4.0` is assembled from a declarative manifest and requires
+`Swiftix Minimal 2.4.1` is assembled from a declarative manifest and requires
 Swiftix 0.13.0:
 
 - The target is fixed at `GOOS=swiftix` and `GOARCH=svm64`; the host may be macOS or Linux.
 - The coreutils repository deterministically builds 17 base commands into `coreutils_1.1.0.pkg`. The distribution validates the package identity declared by the manifest before installation.
 - The sysutils repository builds `memstat`, `lsof`, `pstree`, and `strace` into
-  `sysutils_0.1.0.pkg`; its builder and commands validate Swiftix teaching
+  `sysutils_0.1.1.pkg`; its builder and commands validate Swiftix teaching
   procfs schema 1.
 - The editors repository builds the nano-style `nano` editor into
-  `editors_0.1.0.pkg`; it uses the Swiftix Go terminal ABI (raw mode, window
+  `editors_0.1.1.pkg`; it uses the Swiftix Go terminal ABI (raw mode, window
   size, suspending stdin reads) and edits files up to 512 KiB.
 - Executables are installed in `/usr/bin` with UID 0, GID 0, and mode `0755`.
 - `/var/lib/pkg/status` records coreutils, editors, and sysutils with complete file

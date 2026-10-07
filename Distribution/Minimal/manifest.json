@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "identifier": "org.swiftix.minimal",
   "name": "Swiftix Minimal",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "minimumSwiftixVersion": "0.13.0",
   "packages": [
     {
@@ -13,15 +13,15 @@
     },
     {
       "name": "editors",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "repository": "editors",
-      "source": "Artifacts/editors_0.1.0.pkg"
+      "source": "Artifacts/editors_0.1.1.pkg"
     },
     {
       "name": "sysutils",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "repository": "sysutils",
-      "source": "Artifacts/sysutils_0.1.0.pkg"
+      "source": "Artifacts/sysutils_0.1.1.pkg"
     }
   ],
   "directories": [

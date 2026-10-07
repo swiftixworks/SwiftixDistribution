@@ -4,8 +4,8 @@ SwiftixDistribution is the official build repository for Swiftix distributions. 
 
 ```text
 coreutils_1.1.0.pkg ─┐
-editors_0.1.0.pkg ───┤
-sysutils_0.1.0.pkg ──┼──► Distribution/Minimal (/etc + manifest)
+editors_0.1.1.pkg ───┤
+sysutils_0.1.1.pkg ──┼──► Distribution/Minimal (/etc + manifest)
                      │                    │
                      │                    ▼
                      │       SwiftixDistributionBuilder
@@ -21,12 +21,12 @@ sysutils_0.1.0.pkg ──┼──► Distribution/Minimal (/etc + manifest)
                          Existing instance keeps its snapshot
 ```
 
-`Swiftix Minimal 2.4.0` requires Swiftix 0.13.0 or later and currently includes:
+`Swiftix Minimal 2.4.1` requires Swiftix 0.13.0 or later and currently includes:
 
 - 17 base commands installed and registered from the native `coreutils_1.1.0.pkg` archive: `cat`, `comm`, `echo`, `false`, `fold`, `head`, `nl`, `paste`, `rev`, `seq`, `sort`, `tac`, `tail`, `tr`, `true`, `uniq`, and `wc`;
-- four teaching diagnostics from `sysutils_0.1.0.pkg`: `lsof`, `memstat`,
+- four teaching diagnostics from `sysutils_0.1.1.pkg`: `lsof`, `memstat`,
   `pstree`, and `strace`;
-- the nano-style full-screen text editor `nano` from `editors_0.1.0.pkg`;
+- the nano-style full-screen text editor `nano` from `editors_0.1.1.pkg`;
 - usr-merge-style `/bin`, `/sbin`, and `/lib` symbolic links, together with common Debian/FHS directories;
 - `/etc/hosts`, `/etc/os-release`, `/etc/passwd`, `/etc/group`, and `/etc/pkg/sources.list`; and
 - pinned distribution identity, version, and minimum Swiftix version metadata.
@@ -37,8 +37,8 @@ sysutils_0.1.0.pkg ──┼──► Distribution/Minimal (/etc + manifest)
 | --- | --- |
 | [Swiftix](https://github.com/swiftixworks/Swiftix) | Kernel and VFS, Go toolchain and runtime, the `SwiftixImage` codec, and `pkg` |
 | [coreutils](https://github.com/swiftixworks/coreutils) | Go sources for the base commands, the deterministic package builder, and `coreutils_1.1.0.pkg` |
-| [editors](https://github.com/swiftixworks/editors) | Go sources for terminal text editors and the deterministic `editors_0.1.0.pkg` |
-| [sysutils](https://github.com/swiftixworks/sysutils) | Go sources for versioned teaching diagnostics and the deterministic `sysutils_0.1.0.pkg` |
+| [editors](https://github.com/swiftixworks/editors) | Go sources for terminal text editors and the deterministic `editors_0.1.1.pkg` |
+| [sysutils](https://github.com/swiftixworks/sysutils) | Go sources for versioned teaching diagnostics and the deterministic `sysutils_0.1.1.pkg` |
 | **SwiftixDistribution** | Selection of base packages and `/etc` content, plus building, validating, and versioning root filesystem artifacts |
 | Downstream consumers | Pinning and validating a specific `.sximg` version, and managing instance creation, persistence, and migration |
 
