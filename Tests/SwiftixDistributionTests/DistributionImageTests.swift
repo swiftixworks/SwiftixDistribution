@@ -15,8 +15,8 @@ struct DistributionImageTests {
     func artifactContents() throws {
         let image = try loadImage()
         #expect(image.distribution.identifier == "org.swiftix.minimal")
-        #expect(image.distribution.version == "2.3.0")
-        #expect(image.distribution.minimumSwiftixVersion == "0.12.0")
+        #expect(image.distribution.version == "2.4.0")
+        #expect(image.distribution.minimumSwiftixVersion == "0.13.0")
         #expect(image.distribution.operatingSystem == "swiftix")
         #expect(image.distribution.architecture == "svm64")
 
@@ -55,10 +55,10 @@ struct DistributionImageTests {
         #expect(state.libTarget == "/usr/lib")
         #expect(state.sbinTarget == "/usr/sbin")
         #expect(state.osRelease.contains("ID=swiftix"))
-        #expect(state.osRelease.contains("VERSION_ID=\"2.3.0\""))
+        #expect(state.osRelease.contains("VERSION_ID=\"2.4.0\""))
         #expect(state.repository.contains("repo http://swiftix.holdon.work/repo ./"))
         let installed = try InstalledDatabase.parse(state.packageStatus)
-        #expect(installed.package(named: "coreutils")?.version.description == "1.0.0")
+        #expect(installed.package(named: "coreutils")?.version.description == "1.1.0")
         #expect(installed.package(named: "sysutils")?.version.description == "0.1.0")
         #expect(installed.package(named: "editors")?.version.description == "0.1.0")
         #expect(installed.owner(ofFile: "/usr/bin/nano") == "editors")

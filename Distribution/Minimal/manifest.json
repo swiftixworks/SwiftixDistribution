@@ -2,14 +2,14 @@
   "schemaVersion": 2,
   "identifier": "org.swiftix.minimal",
   "name": "Swiftix Minimal",
-  "version": "2.3.0",
-  "minimumSwiftixVersion": "0.12.0",
+  "version": "2.4.0",
+  "minimumSwiftixVersion": "0.13.0",
   "packages": [
     {
       "name": "coreutils",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "repository": "coreutils",
-      "source": "Artifacts/coreutils_1.0.0.pkg"
+      "source": "Artifacts/coreutils_1.1.0.pkg"
     },
     {
       "name": "editors",
@@ -48,8 +48,10 @@
     { "path": "/var/tmp", "mode": "1777" }
   ],
   "files": [
+    { "source": "Root/etc/group", "path": "/etc/group", "mode": "0644" },
     { "source": "Root/etc/hosts", "path": "/etc/hosts", "mode": "0644" },
     { "source": "Root/etc/os-release", "path": "/etc/os-release", "mode": "0644" },
+    { "source": "Root/etc/passwd", "path": "/etc/passwd", "mode": "0644" },
     { "source": "Root/etc/pkg/sources.list", "path": "/etc/pkg/sources.list", "mode": "0644" }
   ],
   "symlinks": [
